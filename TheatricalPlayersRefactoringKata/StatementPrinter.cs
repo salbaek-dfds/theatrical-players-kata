@@ -6,53 +6,61 @@ namespace TheatricalPlayersRefactoringKata
 {
     public class StatementPrinter
     {
-        public int amountFor(Performance perf, Play play)
+        private Dictionary<string, Play> plays;
+
+        public StatementPrinter(Dictionary<string, Play> inputPlays)
         {
-            var thisAmount = 0;
-            switch (play.Type)
+            plays = inputPlays;
+        }
+
+        Play playFor(Performance performance)
+        {
+            return plays[performance.PlayID];
+        }
+
+        public int amountFor(Performance performance)
+        {
+            var result = 0;
+            switch (playFor(performance).Type)
             {
                 case "tragedy":
-                    thisAmount = 40000;
-                    if (perf.Audience > 30)
+                    result = 40000;
+                    if (performance.Audience > 30)
                     {
-                        thisAmount += 1000 * (perf.Audience - 30);
+                        result += 1000 * (performance.Audience - 30);
                     }
                     break;
                 case "comedy":
-                    thisAmount = 30000;
-                    if (perf.Audience > 20)
+                    result = 30000;
+                    if (performance.Audience > 20)
                     {
-                        thisAmount += 10000 + 500 * (perf.Audience - 20);
+                        result += 10000 + 500 * (performance.Audience - 20);
                     }
-                    thisAmount += 300 * perf.Audience;
+                    result += 300 * performance.Audience;
                     break;
                 default:
-                    throw new Exception("unknown type: " + play.Type);
+                    throw new Exception("unknown type: " + playFor(performance).Type);
             }
-            return thisAmount;
+            return result;
         }
 
-        public string Print(Invoice invoice, Dictionary<string, Play> plays)
+        public string Print(Invoice invoice)
         {
             var totalAmount = 0;
             var volumeCredits = 0;
             var result = string.Format("Statement for {0}\n", invoice.Customer);
             CultureInfo cultureInfo = new CultureInfo("en-US");
 
-            foreach(var perf in invoice.Performances) 
+            foreach(var performance in invoice.Performances) 
             {
-                // calculate performance amount
-                var play = plays[perf.PlayID];
-                var thisAmount = amountFor(perf, play);
-
                 // add volume credits
-                volumeCredits += Math.Max(perf.Audience - 30, 0);
+                volumeCredits += Math.Max(performance.Audience - 30, 0);
                 // add extra credit for every ten comedy attendees
-                if ("comedy" == play.Type) volumeCredits += (int)Math.Floor((decimal)perf.Audience / 5);
+                if ("comedy" == playFor(performance).Type) volumeCredits += (int)Math.Floor((decimal)performance.Audience / 5);
 
                 // print line for this order
-                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", play.Name, Convert.ToDecimal(thisAmount / 100), perf.Audience);
-                totalAmount += thisAmount;
+                result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", playFor(performance).Name, Convert.ToDecimal(amountFor(performance) / 100), performance.Audience);
+                totalAmount += amountFor(performance);
             }
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
             result += String.Format("You earned {0} credits\n", volumeCredits);
