@@ -44,6 +44,14 @@ namespace TheatricalPlayersRefactoringKata
             return result;
         }
 
+        public int volumeCreditsFor(Performance performance)
+        {
+            var result = 0;
+            result += Math.Max(performance.Audience - 30, 0);
+            if ("comedy" == playFor(performance).Type) result += (int)Math.Floor((decimal)performance.Audience / 5);
+            return result;
+        }
+
         public string Print(Invoice invoice)
         {
             var totalAmount = 0;
@@ -53,10 +61,7 @@ namespace TheatricalPlayersRefactoringKata
 
             foreach(var performance in invoice.Performances) 
             {
-                // add volume credits
-                volumeCredits += Math.Max(performance.Audience - 30, 0);
-                // add extra credit for every ten comedy attendees
-                if ("comedy" == playFor(performance).Type) volumeCredits += (int)Math.Floor((decimal)performance.Audience / 5);
+                volumeCredits += volumeCreditsFor(performance);
 
                 // print line for this order
                 result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", playFor(performance).Name, Convert.ToDecimal(amountFor(performance) / 100), performance.Audience);
