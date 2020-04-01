@@ -52,23 +52,32 @@ namespace TheatricalPlayersRefactoringKata
             return result;
         }
 
+        public int totalVolumeCredits(Invoice invoice)
+        {
+            var result = 0;
+            foreach (var performance in invoice.Performances)
+            {
+                result += volumeCreditsFor(performance);
+            }
+
+            return result;
+        }
+
         public string Print(Invoice invoice)
         {
             var totalAmount = 0;
-            var volumeCredits = 0;
             var result = string.Format("Statement for {0}\n", invoice.Customer);
             CultureInfo cultureInfo = new CultureInfo("en-US");
 
             foreach(var performance in invoice.Performances) 
             {
-                volumeCredits += volumeCreditsFor(performance);
-
                 // print line for this order
                 result += String.Format(cultureInfo, "  {0}: {1:C} ({2} seats)\n", playFor(performance).Name, Convert.ToDecimal(amountFor(performance) / 100), performance.Audience);
                 totalAmount += amountFor(performance);
             }
+
             result += String.Format(cultureInfo, "Amount owed is {0:C}\n", Convert.ToDecimal(totalAmount / 100));
-            result += String.Format("You earned {0} credits\n", volumeCredits);
+            result += String.Format("You earned {0} credits\n", totalVolumeCredits(invoice));
             return result;
         }
     }
